@@ -12,7 +12,7 @@ This solution might incur some costs. Proceed at your own discretion, and do not
 - 1 Customer Gateway.
 - Virtual Private Gateway.
 - 3 EC2 instances. EC2-A in private subnet-VPC1. EC2-B and EC2-C in the public and private subnets respectively in VPC2.
-- 1 Internet Gateway that will be attached to VPC2 to allow exteral SSH.
+- 1 Internet Gateway that will be attached to VPC2 to allow external SSH.
 
 ## Installation
 The following commands will initialize Terraform and the your AWS account to deploy the solution in, give you an overview of the deployment plan, and finally actually provision athe resources in your AWS account.
