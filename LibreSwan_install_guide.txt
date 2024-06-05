@@ -1,0 +1,74 @@
+sudo su
+
+nano /etc/yum.repos.d/fedora.repo
+
+[fedora] 
+name=Fedora 36 - $basearch 
+#baseurl=http://download.example/pub/fedora/linux/releases/36/Everything/$basearch/os/ 
+metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-36&arch=$basearch 
+enabled=0 
+countme=1 
+metadata_expire=7d 
+repo_gpgcheck=0 
+type=rpm 
+gpgcheck=1 
+gpgkey=https://getfedora.org/static/fedora.gpg 
+skip_if_unavailable=False 
+
+sudo dnf --enablerepo=fedora install libreswan -y 
+
+nano /etc/sysctl.conf
+
+net.ipv4.ip_forward = 1
+net.ipv4.conf.default.rp_filter = 0
+net.ipv4.conf.default.accept_source_route = 0
+
+sysctl -p
+
+nano /etc/ipsec.conf
+
+include /etc/ipsec.d/*.conf 
+
+nano /etc/ipsec.d/aws.conf
+
+(FROM S2S VPN CONFIGURATION FILE)
+conn Tunnel1
+	authby=secret
+	auto=start
+	left=%defaultroute
+	leftid=15.188.127.23
+	right=18.199.235.190
+	type=tunnel
+	ikelifetime=8h
+	auth=esp 		//MAKE SURE TO REMOVE THIS
+	keylife=1h
+	phase2alg=aes_gcm	//MAKE SURE TO EDIT THIS TO THIS VALUE
+	ike=aes256-sha1		//MAKE SURE TO EDIT THIS TO THIS VALUE
+	keyingtries=%forever
+	keyexchange=ike
+	leftsubnet=		//SUBNET OF PARTNER VPC
+	rightsubnet=		//SUBNET OF AWS VPC
+	dpddelay=10
+	dpdtimeout=30
+	dpdaction=restart_by_peer
+
+nano /etc/ipsec.d/aws.secrets
+<Add the command from the S2S VPN config file downloaded with the publich shared key>
+
+sudo systemctl start ipsec.service 	//To start the IPsec.service>
+
+sudo systemctl status ipsec.service 	//To check the status of the IPsec.service>
+
+ping <Private IP of the EC2 in VPN-A>	//As we are using the private IP, this will ensure that the ping traversed the tunnel
+
+sudo systemctl restart ipsec.service 	//To restart the IPsec service after any changes
+
+If Tunnel is UP but ping is not working: 
+a. Make sure EC2-A Security group allows ICMP IPv4 All traffic from VPC-DC CIDR 
+b. Make sure VPC-AWS Private subnet route table has route for Destination VPC-DC CIDR with target as VGW 
+c. Make sure the RT for the private subnet in VPC B has 10.0.0.0/16 routing to the correct ENI (with public IP address)
+
+
+
+
+
