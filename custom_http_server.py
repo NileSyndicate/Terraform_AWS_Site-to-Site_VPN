@@ -5,7 +5,7 @@ class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
-        self.wfile.write(bytes("Hi Scalable Capital!", "utf-8"))
+        self.wfile.write(bytes("Hi.This is a custom message reply!", "utf-8"))
 
 def run():
     print('Starting server...')
